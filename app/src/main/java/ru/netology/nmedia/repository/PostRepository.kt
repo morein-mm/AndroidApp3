@@ -5,8 +5,9 @@ import ru.netology.nmedia.dto.Post
 
 interface PostRepository {
     val data: LiveData<List<Post>>
+    var startLocalId: Long
     suspend fun getAll()
     suspend fun save(post: Post)
     suspend fun removeById(id: Long)
-    suspend fun likeById(id: Long)
+    suspend fun likeById(id: Long, likedByMe: Boolean)
 }
