@@ -1,6 +1,13 @@
 package ru.netology.nmedia.repository
 
 import androidx.lifecycle.*
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import okio.IOException
 import ru.netology.nmedia.api.*
 import ru.netology.nmedia.dao.PostDao
@@ -11,9 +18,12 @@ import ru.netology.nmedia.entity.toEntity
 import ru.netology.nmedia.error.ApiError
 import ru.netology.nmedia.error.NetworkError
 import ru.netology.nmedia.error.UnknownError
+import kotlin.time.Duration.Companion.seconds
 
 class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
-    override val data = dao.getAll().map(List<PostEntity>::toDto)
+    override val data = dao.getAll()
+        .map(List<PostEntity>::toDto)
+        .flowOn(Dispatchers.Default)
     override var startLocalId = -1L
 
     override suspend fun getAll() {
@@ -84,6 +94,23 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
             throw NetworkError
         } catch (e: Exception) {
             throw UnknownError
+        }
+    }
+
+    override fun getNewerCount(newerId: Long): Flow<Int> = flow {
+        while (true) {
+            delay(10.seconds)
+
+            try {
+                val responce = PostsApi.service.getNewer(newerId)
+                val body = responce.body() ?: continue
+                dao.insert(body.toEntity())
+                emit(body.size)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                // do nothing
+            }
         }
     }
 }
