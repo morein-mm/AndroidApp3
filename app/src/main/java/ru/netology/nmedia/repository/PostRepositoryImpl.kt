@@ -23,7 +23,7 @@ import kotlin.time.Duration.Companion.seconds
 import ru.netology.nmedia.model.FeedModel
 
 class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
-    override val data = dao.getAll()
+    override val data = dao.getAllShown()
         .map(List<PostEntity>::toDto)
         .flowOn(Dispatchers.Default)
     override var startLocalId = -1L

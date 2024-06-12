@@ -88,9 +88,16 @@ class FeedFragment : Fragment() {
 
         binding.showNewerPosts.setOnClickListener {
             viewModel.showAll()
-            binding.list.smoothScrollToPosition(0)
             binding.showNewerPosts.visibility = View.GONE
         }
+
+        adapter.registerAdapterDataObserver(object: RecyclerView.AdapterDataObserver(){
+            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+                if (positionStart == 0) {
+                    binding.list.smoothScrollToPosition(0)
+                }
+            }
+        })
 
         binding.swiperefresh.setOnRefreshListener {
             viewModel.refreshPosts()
