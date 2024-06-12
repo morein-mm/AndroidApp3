@@ -22,4 +22,5 @@
     <string name="channel_remote_name">Уведомления с сервера</string>
     <string name="channel_remote_description">Уведомления с удалённого сервера</string>
     <string name="menu_retryLoad">Повторить загрузку</string>
+    <string name="showNewPosts">Показать новые посты - %1$d</string>
 </resources>

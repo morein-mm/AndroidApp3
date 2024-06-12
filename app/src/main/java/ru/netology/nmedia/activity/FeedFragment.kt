@@ -10,6 +10,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import ru.netology.nmedia.R
 import ru.netology.nmedia.adapter.OnInteractionListener
@@ -76,6 +77,19 @@ class FeedFragment : Fragment() {
 
         viewModel.newerCount.observe(viewLifecycleOwner) {
             Log.d("FeedFragment", "Newer count: $it")
+            if (it > 0) {
+                binding.showNewerPosts.text = getString(R.string.showNewPosts, it)
+                binding.showNewerPosts.visibility = View.VISIBLE
+            } else {
+                binding.showNewerPosts.visibility = View.GONE
+            }
+
+        }
+
+        binding.showNewerPosts.setOnClickListener {
+            viewModel.showAll()
+            binding.list.smoothScrollToPosition(0)
+            binding.showNewerPosts.visibility = View.GONE
         }
 
         binding.swiperefresh.setOnRefreshListener {

@@ -27,7 +27,8 @@ private val empty = Post(
     likedByMe = false,
     likes = 0,
     published = "",
-    draft = true
+    draft = true,
+    shown = true
 )
 
 class PostViewModel(application: Application) : AndroidViewModel(application) {
@@ -125,5 +126,14 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         }
 
     }
+
+    fun showAll() = viewModelScope.launch {
+        try {
+            repository.showAll()
+        } catch (e: Exception) {
+            _dataState.value = FeedModelState(error = true)
+        }
+    }
+
 }
 

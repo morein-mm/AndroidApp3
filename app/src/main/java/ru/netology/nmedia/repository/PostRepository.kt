@@ -7,8 +7,10 @@ interface PostRepository {
     val data: Flow<List<Post>>
     var startLocalId: Long
     suspend fun getAll()
+    suspend fun getAllShown()
     suspend fun save(post: Post)
     suspend fun removeById(id: Long)
     suspend fun likeById(id: Long, likedByMe: Boolean)
     fun getNewerCount(newerId: Long): Flow<Int>
+    suspend fun showAll()
 }

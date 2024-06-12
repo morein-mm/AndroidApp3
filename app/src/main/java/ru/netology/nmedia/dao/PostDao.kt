@@ -12,8 +12,17 @@ interface PostDao {
     @Query("SELECT * FROM PostEntity ORDER BY id DESC")
     fun getAll(): Flow<List<PostEntity>>
 
+    @Query("SELECT * FROM PostEntity WHERE shown = 1 ORDER BY id DESC")
+    fun getAllShown(): Flow<List<PostEntity>>
+
     @Query("SELECT COUNT(*) == 0 FROM PostEntity")
     suspend fun isEmpty(): Boolean
+
+    @Query("SELECT COUNT(*) FROM PostEntity WHERE shown = 0")
+    suspend fun countNotShown(): Int
+
+    @Query("UPDATE PostEntity SET shown = 1")
+    suspend fun showAll(): Unit
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(post: PostEntity)

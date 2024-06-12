@@ -1,5 +1,6 @@
 package ru.netology.nmedia.repository
 
+import android.util.Log
 import androidx.lifecycle.*
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -19,6 +20,7 @@ import ru.netology.nmedia.error.ApiError
 import ru.netology.nmedia.error.NetworkError
 import ru.netology.nmedia.error.UnknownError
 import kotlin.time.Duration.Companion.seconds
+import ru.netology.nmedia.model.FeedModel
 
 class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
     override val data = dao.getAll()
@@ -40,6 +42,10 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
         } catch (e: Exception) {
             throw UnknownError
         }
+    }
+
+    override suspend fun getAllShown() {
+        dao.getAllShown()
     }
 
     override suspend fun save(post: Post) {
@@ -90,6 +96,7 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
             }
             val body = response.body() ?: throw ApiError(response.code(), response.message())
             dao.insert(PostEntity.fromDto(body))
+
         } catch (e: IOException) {
             throw NetworkError
         } catch (e: Exception) {
@@ -100,17 +107,20 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
     override fun getNewerCount(newerId: Long): Flow<Int> = flow {
         while (true) {
             delay(10.seconds)
-
             try {
                 val responce = PostsApi.service.getNewer(newerId)
                 val body = responce.body() ?: continue
-                dao.insert(body.toEntity())
-                emit(body.size)
+                dao.insert(body.toEntity(false))
+                emit(dao.countNotShown())
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
                 // do nothing
             }
         }
+    }
+
+    override suspend fun showAll() {
+        dao.showAll()
     }
 }
