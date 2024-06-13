@@ -1,8 +1,10 @@
 package ru.netology.nmedia.adapter
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
+import androidx.lifecycle.ViewModel
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -17,6 +19,7 @@ interface OnInteractionListener {
     fun onEdit(post: Post) {}
     fun onRemove(post: Post) {}
     fun onShare(post: Post) {}
+    fun onRetryLoad(post: Post) {}
 }
 
 class PostsAdapter(
@@ -46,10 +49,26 @@ class PostViewHolder(
             avatar.loadCircleCrop("${BuildConfig.BASE_URL}/avatars/${post.authorAvatar}")
             like.isChecked = post.likedByMe
             like.text = "${post.likes}"
+            if (post.draft) {
+                loading.visibility = View.VISIBLE
+                like.visibility = View.GONE
+                share.visibility = View.GONE
+            } else {
+                loading.visibility = View.GONE
+                like.visibility = View.VISIBLE
+                share.visibility = View.VISIBLE
+            }
+
 
             menu.setOnClickListener {
                 PopupMenu(it.context, it).apply {
                     inflate(R.menu.options_post)
+
+                    if (post.draft) {
+                        menu.findItem(R.id.retryLoad).setVisible(true)
+                    } else {
+                        menu.findItem(R.id.retryLoad).setVisible(false)
+                    }
                     setOnMenuItemClickListener { item ->
                         when (item.itemId) {
                             R.id.remove -> {
@@ -58,6 +77,10 @@ class PostViewHolder(
                             }
                             R.id.edit -> {
                                 onInteractionListener.onEdit(post)
+                                true
+                            }
+                            R.id.retryLoad -> {
+                                onInteractionListener.onRetryLoad(post)
                                 true
                             }
 
