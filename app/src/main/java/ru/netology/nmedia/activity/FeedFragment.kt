@@ -1,6 +1,7 @@
 package ru.netology.nmedia.activity
 
 import android.content.Intent
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -13,6 +14,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import ru.netology.nmedia.R
+import ru.netology.nmedia.activity.ImageAttachmentFragment.Companion.textArg
 import ru.netology.nmedia.adapter.OnInteractionListener
 import ru.netology.nmedia.adapter.PostsAdapter
 import ru.netology.nmedia.databinding.FragmentFeedBinding
@@ -58,6 +60,12 @@ class FeedFragment : Fragment() {
             override fun onRetryLoad(post: Post) {
                 viewModel.edit(post)
                 viewModel.save()
+            }
+
+            override fun onOpenImageAttachment(post: Post) {
+                findNavController().navigate(R.id.action_feedFragment_to_imageAttachmentFragment, Bundle().apply {
+                    textArg = post.attachment?.url
+                })
             }
         })
         binding.list.adapter = adapter
