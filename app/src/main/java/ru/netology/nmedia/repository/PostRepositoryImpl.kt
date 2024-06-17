@@ -1,6 +1,5 @@
 package ru.netology.nmedia.repository
 
-import android.util.Log
 import androidx.lifecycle.*
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -9,18 +8,23 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
 import okio.IOException
 import ru.netology.nmedia.api.*
 import ru.netology.nmedia.dao.PostDao
+import ru.netology.nmedia.dto.Attachment
+import ru.netology.nmedia.dto.Media
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.entity.PostEntity
 import ru.netology.nmedia.entity.toDto
 import ru.netology.nmedia.entity.toEntity
+import ru.netology.nmedia.enumeration.AttachmentType
 import ru.netology.nmedia.error.ApiError
 import ru.netology.nmedia.error.NetworkError
 import ru.netology.nmedia.error.UnknownError
+import java.io.File
 import kotlin.time.Duration.Companion.seconds
-import ru.netology.nmedia.model.FeedModel
 
 class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
     override val data = dao.getAllShown()
@@ -117,6 +121,27 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
             } catch (e: Exception) {
                 // do nothing
             }
+        }
+    }
+
+    override suspend fun saveWithAttachment(post: Post, file: File) {
+        val upload = upload(file)
+        val copy = post.copy(attachment = Attachment(upload.id, AttachmentType.IMAGE))
+        save(copy)
+    }
+
+    private suspend fun upload(file: File): Media {
+        try {
+            val part = MultipartBody.Part.createFormData("file", file.name, file.asRequestBody())
+            val response = PostsApi.service.upload(part)
+            if (!response.isSuccessful) {
+                throw ApiError(response.code(), response.message())
+            }
+            return response.body() ?: throw ApiError(response.code(), response.message())
+        } catch (e: IOException) {
+            throw NetworkError
+        } catch (e: Exception) {
+            throw UnknownError
         }
     }
 
