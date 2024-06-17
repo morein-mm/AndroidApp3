@@ -1,19 +1,27 @@
 package ru.netology.nmedia.viewmodel
 
 import android.app.Application
+import android.net.Uri
+import android.provider.ContactsContract.Contacts.Photo
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.map
+import androidx.lifecycle.asLiveData
+import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import ru.netology.nmedia.db.AppDb
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.model.FeedModel
 import ru.netology.nmedia.model.FeedModelState
+import ru.netology.nmedia.model.PhotoModel
 import ru.netology.nmedia.repository.PostRepository
 import ru.netology.nmedia.repository.PostRepositoryImpl
 import ru.netology.nmedia.util.SingleLiveEvent
+import java.io.File
 
 private val empty = Post(
     id = 0,
@@ -22,8 +30,12 @@ private val empty = Post(
     authorAvatar = "",
     likedByMe = false,
     likes = 0,
-    published = ""
+    published = "",
+    draft = true,
+    shown = true
 )
+
+private val noPhoto = PhotoModel()
 
 class PostViewModel(application: Application) : AndroidViewModel(application) {
     // упрощённый вариант
@@ -31,9 +43,20 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         PostRepositoryImpl(AppDb.getInstance(context = application).postDao())
 
     val data: LiveData<FeedModel> = repository.data.map(::FeedModel)
+        .asLiveData(Dispatchers.Default)
     private val _dataState = MutableLiveData<FeedModelState>()
     val dataState: LiveData<FeedModelState>
         get() = _dataState
+
+    private val _photo = MutableLiveData(noPhoto)
+    val photo: LiveData<PhotoModel>
+        get() = _photo
+
+    val newerCount: LiveData<Int> = data.switchMap {
+        val newerId = it.posts.firstOrNull()?.id ?: 0L
+        repository.getNewerCount(newerId)
+            .asLiveData(Dispatchers.Default)
+    }
 
     private val edited = MutableLiveData(empty)
     private val _postCreated = SingleLiveEvent<Unit>()
@@ -69,7 +92,13 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
             _postCreated.value = Unit
             viewModelScope.launch {
                 try {
-                    repository.save(it)
+                    when (_photo.value) {
+                        noPhoto -> repository.save(it)
+                        else -> _photo.value?.file?.let {file ->
+                            repository.saveWithAttachment(it, file)
+                        }
+                    }
+
                     _dataState.value = FeedModelState()
                 } catch (e: Exception) {
                     _dataState.value = FeedModelState(error = true)
@@ -92,10 +121,43 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun likeById(id: Long) {
-        TODO()
+
+        val likedByMe = repository.data.asLiveData().value?.find { it.id == id }?.likedByMe ?: return
+        viewModelScope.launch {
+            try {
+                repository.likeById(id, likedByMe)
+                _dataState.value = FeedModelState()
+            } catch (e: Exception) {
+                _dataState.value = FeedModelState(error = true)
+            }
+        }
     }
 
-    fun removeById(id: Long) {
-        TODO()
+    fun removeById(id: Long) = viewModelScope.launch {
+        try {
+            repository.removeById(id)
+            _dataState.value = FeedModelState()
+        } catch (e: Exception) {
+            _dataState.value = FeedModelState(error = true)
+        }
+
     }
+
+    fun showAll() = viewModelScope.launch {
+        try {
+            repository.showAll()
+        } catch (e: Exception) {
+            _dataState.value = FeedModelState(error = true)
+        }
+    }
+
+    fun changePhoto(uri: Uri?, file: File?) {
+        _photo.value = PhotoModel(uri, file)
+    }
+
+    fun dropPhoto() {
+        _photo.value = noPhoto
+    }
+
 }
+

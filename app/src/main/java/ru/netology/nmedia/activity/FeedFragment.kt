@@ -1,7 +1,9 @@
 package ru.netology.nmedia.activity
 
 import android.content.Intent
+import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,8 +11,10 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import ru.netology.nmedia.R
+import ru.netology.nmedia.activity.ImageAttachmentFragment.Companion.textArg
 import ru.netology.nmedia.adapter.OnInteractionListener
 import ru.netology.nmedia.adapter.PostsAdapter
 import ru.netology.nmedia.databinding.FragmentFeedBinding
@@ -52,6 +56,17 @@ class FeedFragment : Fragment() {
                     Intent.createChooser(intent, getString(R.string.chooser_share_post))
                 startActivity(shareIntent)
             }
+
+            override fun onRetryLoad(post: Post) {
+                viewModel.edit(post)
+                viewModel.save()
+            }
+
+            override fun onOpenImageAttachment(post: Post) {
+                findNavController().navigate(R.id.action_feedFragment_to_imageAttachmentFragment, Bundle().apply {
+                    textArg = post.attachment?.url
+                })
+            }
         })
         binding.list.adapter = adapter
         viewModel.dataState.observe(viewLifecycleOwner) { state ->
@@ -67,6 +82,30 @@ class FeedFragment : Fragment() {
             adapter.submitList(state.posts)
             binding.emptyText.isVisible = state.empty
         }
+
+        viewModel.newerCount.observe(viewLifecycleOwner) {
+            Log.d("FeedFragment", "Newer count: $it")
+            if (it > 0) {
+                binding.showNewerPosts.text = getString(R.string.showNewPosts, it)
+                binding.showNewerPosts.visibility = View.VISIBLE
+            } else {
+                binding.showNewerPosts.visibility = View.GONE
+            }
+
+        }
+
+        binding.showNewerPosts.setOnClickListener {
+            viewModel.showAll()
+            binding.showNewerPosts.visibility = View.GONE
+        }
+
+        adapter.registerAdapterDataObserver(object: RecyclerView.AdapterDataObserver(){
+            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+                if (positionStart == 0) {
+                    binding.list.smoothScrollToPosition(0)
+                }
+            }
+        })
 
         binding.swiperefresh.setOnRefreshListener {
             viewModel.refreshPosts()

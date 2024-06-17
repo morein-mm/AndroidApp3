@@ -1,6 +1,8 @@
 package ru.netology.nmedia.adapter
 
+import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
 import androidx.recyclerview.widget.DiffUtil
@@ -10,6 +12,7 @@ import ru.netology.nmedia.BuildConfig
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.CardPostBinding
 import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.view.load
 import ru.netology.nmedia.view.loadCircleCrop
 
 interface OnInteractionListener {
@@ -17,6 +20,8 @@ interface OnInteractionListener {
     fun onEdit(post: Post) {}
     fun onRemove(post: Post) {}
     fun onShare(post: Post) {}
+    fun onRetryLoad(post: Post) {}
+    fun onOpenImageAttachment(post: Post)
 }
 
 class PostsAdapter(
@@ -35,7 +40,7 @@ class PostsAdapter(
 
 class PostViewHolder(
     private val binding: CardPostBinding,
-    private val onInteractionListener: OnInteractionListener,
+    private val onInteractionListener: OnInteractionListener
 ) : RecyclerView.ViewHolder(binding.root) {
 
     fun bind(post: Post) {
@@ -46,18 +51,55 @@ class PostViewHolder(
             avatar.loadCircleCrop("${BuildConfig.BASE_URL}/avatars/${post.authorAvatar}")
             like.isChecked = post.likedByMe
             like.text = "${post.likes}"
+            if (post.draft) {
+                loading.visibility = View.VISIBLE
+                like.visibility = View.GONE
+                share.visibility = View.GONE
+            } else {
+                loading.visibility = View.GONE
+                like.visibility = View.VISIBLE
+                share.visibility = View.VISIBLE
+            }
+            if (post.attachment != null) {
+                println("LOAD IN FEED")
+                println(post.attachment.url)
+                imageAttachment.load("${BuildConfig.BASE_URL}/media/${post.attachment.url}")
+                imageAttachment.visibility = View.VISIBLE
+                imageAttachment.setOnClickListener {
+                    println("CLICK")
+                    onInteractionListener.onOpenImageAttachment(post)
+
+                }
+            } else {
+                imageAttachment.visibility = View.GONE
+            }
+
+
+
 
             menu.setOnClickListener {
                 PopupMenu(it.context, it).apply {
                     inflate(R.menu.options_post)
+
+                    if (post.draft) {
+                        menu.findItem(R.id.retryLoad).setVisible(true)
+                    } else {
+                        menu.findItem(R.id.retryLoad).setVisible(false)
+                    }
                     setOnMenuItemClickListener { item ->
                         when (item.itemId) {
                             R.id.remove -> {
                                 onInteractionListener.onRemove(post)
                                 true
                             }
+
                             R.id.edit -> {
                                 onInteractionListener.onEdit(post)
+                                true
+                            }
+
+                            R.id.retryLoad -> {
+                                onInteractionListener.onRetryLoad(post)
                                 true
                             }
 
