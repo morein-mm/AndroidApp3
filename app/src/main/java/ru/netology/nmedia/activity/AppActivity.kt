@@ -1,6 +1,7 @@
 package ru.netology.nmedia.activity
 
 import android.Manifest
+import android.app.AlertDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
@@ -13,7 +14,6 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.MenuProvider
 import androidx.navigation.findNavController
-import androidx.navigation.fragment.findNavController
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.firebase.messaging.FirebaseMessaging
@@ -73,13 +73,31 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
                             findNavController(R.id.nav_host_fragment).navigate(R.id.action_newPostFragment_to_signInFragment)
                             true
                         }
+
                         R.id.sign_up -> {
                             AppAuth.getInstance().setAuth(5, "x-token")
                             true
                         }
 
                         R.id.logout -> {
-                            AppAuth.getInstance().clearAuth()
+
+                            if (supportFragmentManager.fragments.last()
+                                    ?.getChildFragmentManager()?.fragments?.get(0) is NewPostFragment
+                            ) {
+                                AlertDialog.Builder(this@AppActivity)
+                                    .setMessage(getString(R.string.sure_post_dialog))
+                                    .setTitle(getString(R.string.sure_post_dialog_header))
+                                    .setPositiveButton(getString(R.string.logout)) { dialog, which ->
+                                        AppAuth.getInstance().clearAuth()
+                                        findNavController(R.id.nav_host_fragment).navigateUp()
+                                    }
+                                    .setNegativeButton(getString(R.string.cancel)) { dialog, which ->
+                                    }
+                                    .create()
+                                    .show()
+                            } else {
+                                AppAuth.getInstance().clearAuth()
+                            }
                             true
                         }
 

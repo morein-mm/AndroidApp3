@@ -33,4 +33,11 @@
     <string name="sign_up">Зарегистрироваться</string>
     <string name="login">Логин</string>
     <string name="password">Пароль</string>
+    <string name="create_post_dialog">Делитесь текстами и фотографиями.</string>
+    <string name="create_post_dialog_header">Войдите и создавайте посты!</string>
+    <string name="cancel">Отмена</string>
+    <string name="like_post_dialog">Покажите ваши эмоции.</string>
+    <string name="like_post_dialog_header">Войдите и отправляйте реакции!</string>
+    <string name="sure_post_dialog">Если выйти, пост не будет создан.</string>
+    <string name="sure_post_dialog_header">Вы уверены?</string>
 </resources>

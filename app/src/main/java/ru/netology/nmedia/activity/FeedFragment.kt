@@ -1,7 +1,7 @@
 package ru.netology.nmedia.activity
 
+import android.app.AlertDialog
 import android.content.Intent
-import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
@@ -19,6 +20,7 @@ import ru.netology.nmedia.adapter.OnInteractionListener
 import ru.netology.nmedia.adapter.PostsAdapter
 import ru.netology.nmedia.databinding.FragmentFeedBinding
 import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.viewmodel.AuthViewModel
 import ru.netology.nmedia.viewmodel.PostViewModel
 
 class FeedFragment : Fragment() {
@@ -38,7 +40,23 @@ class FeedFragment : Fragment() {
             }
 
             override fun onLike(post: Post) {
-                viewModel.likeById(post.id)
+                val viewModelAuth by viewModels<AuthViewModel>()
+                viewModelAuth.auth.observe(viewLifecycleOwner) {
+                    if (viewModelAuth.isAuthorized) {
+                        viewModel.likeById(post.id)
+                    } else {
+                        AlertDialog.Builder(context)
+                            .setMessage(getString(R.string.like_post_dialog))
+                            .setTitle(getString(R.string.like_post_dialog_header))
+                            .setPositiveButton(getString(R.string.sign_up)) { dialog, which ->
+                                findNavController().navigate(R.id.action_feedFragment_to_signInFragment)
+                            }
+                            .setNegativeButton(getString(R.string.cancel)) { dialog, which ->
+                            }
+                            .create()
+                            .show()
+                    }
+                }
             }
 
             override fun onRemove(post: Post) {
@@ -63,9 +81,11 @@ class FeedFragment : Fragment() {
             }
 
             override fun onOpenImageAttachment(post: Post) {
-                findNavController().navigate(R.id.action_feedFragment_to_imageAttachmentFragment, Bundle().apply {
-                    textArg = post.attachment?.url
-                })
+                findNavController().navigate(
+                    R.id.action_feedFragment_to_imageAttachmentFragment,
+                    Bundle().apply {
+                        textArg = post.attachment?.url
+                    })
             }
         })
         binding.list.adapter = adapter
@@ -99,7 +119,7 @@ class FeedFragment : Fragment() {
             binding.showNewerPosts.visibility = View.GONE
         }
 
-        adapter.registerAdapterDataObserver(object: RecyclerView.AdapterDataObserver(){
+        adapter.registerAdapterDataObserver(object : RecyclerView.AdapterDataObserver() {
             override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
                 if (positionStart == 0) {
                     binding.list.smoothScrollToPosition(0)
@@ -112,7 +132,24 @@ class FeedFragment : Fragment() {
         }
 
         binding.fab.setOnClickListener {
-            findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
+
+            val viewModel by viewModels<AuthViewModel>()
+            viewModel.auth.observe(viewLifecycleOwner) {
+                if (viewModel.isAuthorized) {
+                    findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
+                } else {
+                    AlertDialog.Builder(context)
+                        .setMessage(getString(R.string.create_post_dialog))
+                        .setTitle(getString(R.string.create_post_dialog_header))
+                        .setPositiveButton(getString(R.string.sign_up)) { dialog, which ->
+                            findNavController().navigate(R.id.action_feedFragment_to_signInFragment)
+                        }
+                        .setNegativeButton(getString(R.string.cancel)) { dialog, which ->
+                        }
+                        .create()
+                        .show()
+                }
+            }
         }
 
         return binding.root

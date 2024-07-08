@@ -32,4 +32,11 @@
     <string name="sign_up">Sign Up</string>
     <string name="login">Login</string>
     <string name="password">Password</string>
+    <string name="create_post_dialog">Share texts and photos.</string>
+    <string name="create_post_dialog_header">Sign Up and create posts!</string>
+    <string name="cancel">Cancel</string>
+    <string name="like_post_dialog">Show your emotions.</string>
+    <string name="like_post_dialog_header">Sign Up and send reactions!</string>
+    <string name="sure_post_dialog">If logout post will not be created.</string>
+    <string name="sure_post_dialog_header">Are you sure?</string>
 </resources>
