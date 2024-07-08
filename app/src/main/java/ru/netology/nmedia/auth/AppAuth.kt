@@ -51,9 +51,7 @@ class AppAuth private constructor(context: Context) {
         }
 
 
-
         fun init(context: Context) {
-
             INSTANCE = AppAuth(context.applicationContext)
         }
     }

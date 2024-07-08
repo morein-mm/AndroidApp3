@@ -13,6 +13,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.MenuProvider
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.firebase.messaging.FirebaseMessaging
@@ -68,7 +69,10 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
 
                 override fun onMenuItemSelected(menuItem: MenuItem): Boolean =
                     when (menuItem.itemId) {
-                        R.id.sign_in,
+                        R.id.sign_in -> {
+                            findNavController(R.id.nav_host_fragment).navigate(R.id.action_newPostFragment_to_signInFragment)
+                            true
+                        }
                         R.id.sign_up -> {
                             AppAuth.getInstance().setAuth(5, "x-token")
                             true

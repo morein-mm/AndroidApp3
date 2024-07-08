@@ -30,5 +30,7 @@
     <string name="remove">Удалить</string>
     <string name="logout">Выйти</string>
     <string name="sign_in">Войти</string>
-    <string name="sign_up">Зарегистрироываться</string>
+    <string name="sign_up">Зарегистрироваться</string>
+    <string name="login">Логин</string>
+    <string name="password">Пароль</string>
 </resources>
