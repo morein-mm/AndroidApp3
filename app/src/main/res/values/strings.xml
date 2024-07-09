@@ -39,4 +39,6 @@
     <string name="like_post_dialog_header">Sign In and send reactions!</string>
     <string name="sure_post_dialog">If logout post will not be created.</string>
     <string name="sure_post_dialog_header">Are you sure?</string>
+    <string name="name">Name</string>
+    <string name="password_confirm">Confirm password</string>
 </resources>

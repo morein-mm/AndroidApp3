@@ -35,4 +35,19 @@ class AuthViewModel : ViewModel() {
         }
     }
 
+    fun registerUser(login: String, password: String, name: String) {
+        viewModelScope.launch {
+            try {
+                val token = repository.registerUser(login, password, name)
+                AppAuth.getInstance().setAuth(token.id, token.token)
+            } catch (e: Exception) {
+                println("11")
+//                _dataState.value = FeedModelState(error = true)
+                //как обработать ошибку?
+
+
+            }
+        }
+    }
+
 }

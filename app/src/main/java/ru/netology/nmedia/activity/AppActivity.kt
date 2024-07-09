@@ -75,7 +75,15 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
                         }
 
                         R.id.sign_up -> {
-                            AppAuth.getInstance().setAuth(5, "x-token")
+                            findNavController(R.id.nav_host_fragment).navigate(
+                                when (supportFragmentManager.fragments.last()
+                                    ?.getChildFragmentManager()?.fragments?.get(0)) {
+                                    is NewPostFragment -> R.id.action_newPostFragment_to_signUpFragment
+                                    is ImageAttachmentFragment -> R.id.action_imageAttachmentFragment_to_signUpFragment
+                                    is SignInFragment -> R.id.action_signInFragment_to_signUpFragment
+                                    else -> R.id.action_feedFragment_to_signUpFragment
+                                }
+                            )
                             true
                         }
 
