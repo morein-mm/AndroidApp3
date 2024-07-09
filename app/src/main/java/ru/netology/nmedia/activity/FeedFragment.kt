@@ -48,7 +48,7 @@ class FeedFragment : Fragment() {
                         AlertDialog.Builder(context)
                             .setMessage(getString(R.string.like_post_dialog))
                             .setTitle(getString(R.string.like_post_dialog_header))
-                            .setPositiveButton(getString(R.string.sign_up)) { dialog, which ->
+                            .setPositiveButton(getString(R.string.sign_in)) { dialog, which ->
                                 findNavController().navigate(R.id.action_feedFragment_to_signInFragment)
                             }
                             .setNegativeButton(getString(R.string.cancel)) { dialog, which ->
@@ -141,7 +141,7 @@ class FeedFragment : Fragment() {
                     AlertDialog.Builder(context)
                         .setMessage(getString(R.string.create_post_dialog))
                         .setTitle(getString(R.string.create_post_dialog_header))
-                        .setPositiveButton(getString(R.string.sign_up)) { dialog, which ->
+                        .setPositiveButton(getString(R.string.sign_in)) { dialog, which ->
                             findNavController().navigate(R.id.action_feedFragment_to_signInFragment)
                         }
                         .setNegativeButton(getString(R.string.cancel)) { dialog, which ->
