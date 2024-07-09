@@ -40,4 +40,6 @@
     <string name="like_post_dialog_header">Войдите и отправляйте реакции!</string>
     <string name="sure_post_dialog">Если выйти, пост не будет создан.</string>
     <string name="sure_post_dialog_header">Вы уверены?</string>
+    <string name="name">Имя</string>
+    <string name="password_confirm">Подтверждение пароля</string>
 </resources>
