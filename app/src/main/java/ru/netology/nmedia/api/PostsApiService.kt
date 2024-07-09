@@ -1,5 +1,6 @@
 package ru.netology.nmedia.api
 
+import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Response
@@ -7,18 +8,34 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.*
 import ru.netology.nmedia.BuildConfig
+import ru.netology.nmedia.auth.AppAuth
+import ru.netology.nmedia.dto.Media
 import ru.netology.nmedia.dto.Post
 
 private const val BASE_URL = "${BuildConfig.BASE_URL}/api/slow/"
 
 private val logging = HttpLoggingInterceptor().apply {
     if (BuildConfig.DEBUG) {
-        level = HttpLoggingInterceptor.Level.BODY
+        level = HttpLoggingInterceptor.Level.HEADERS
     }
 }
 
 private val okhttp = OkHttpClient.Builder()
     .addInterceptor(logging)
+    .addInterceptor {chain ->
+        chain.proceed(
+            chain.run {
+                val token = AppAuth.getInstance().state.value?.token
+                if (token != null) {
+                    this.request().newBuilder()
+                        .addHeader("Authorization", token)
+                        .build()
+                } else {
+                    request()
+                }
+            }
+        )
+    }
     .build()
 
 private val retrofit = Retrofit.Builder()
@@ -30,6 +47,9 @@ private val retrofit = Retrofit.Builder()
 interface PostsApiService {
     @GET("posts")
     suspend fun getAll(): Response<List<Post>>
+
+    @GET("posts/{id}/newer")
+    suspend fun getNewer(@Path("id") id: Long): Response<List<Post>>
 
     @GET("posts/{id}")
     suspend fun getById(@Path("id") id: Long): Response<Post>
@@ -45,6 +65,10 @@ interface PostsApiService {
 
     @DELETE("posts/{id}/likes")
     suspend fun dislikeById(@Path("id") id: Long): Response<Post>
+
+    @Multipart
+    @POST("media")
+    suspend fun upload(@Part file: MultipartBody.Part): Response<Media>
 }
 
 object PostsApi {

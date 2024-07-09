@@ -1,18 +1,26 @@
 package ru.netology.nmedia.activity
 
 import android.Manifest
+import android.app.AlertDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.MenuProvider
 import androidx.navigation.findNavController
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.firebase.messaging.FirebaseMessaging
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
+import ru.netology.nmedia.auth.AppAuth
+import ru.netology.nmedia.viewmodel.AuthViewModel
 
 class AppActivity : AppCompatActivity(R.layout.activity_app) {
 
@@ -42,7 +50,77 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
         }
 
         checkGoogleApiAvailability()
+
+        val viewModel by viewModels<AuthViewModel>()
+        var currentMenuProvider: MenuProvider? = null
+        viewModel.auth.observe(this) {
+            val isAuthorized = viewModel.isAuthorized
+
+            currentMenuProvider?.let {
+                removeMenuProvider(it)
+            }
+
+            addMenuProvider(object : MenuProvider {
+                override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                    menuInflater.inflate(R.menu.auth_menu, menu)
+                    menu.setGroupVisible(R.id.authorized, isAuthorized)
+                    menu.setGroupVisible(R.id.unauthorized, !isAuthorized)
+                }
+
+                override fun onMenuItemSelected(menuItem: MenuItem): Boolean =
+                    when (menuItem.itemId) {
+                        R.id.sign_in -> {
+                            findNavController(R.id.nav_host_fragment).navigate(R.id.action_newPostFragment_to_signInFragment)
+                            true
+                        }
+
+                        R.id.sign_up -> {
+                            findNavController(R.id.nav_host_fragment).navigate(
+                                when (supportFragmentManager.fragments.last()
+                                    ?.getChildFragmentManager()?.fragments?.get(0)) {
+                                    is NewPostFragment -> R.id.action_newPostFragment_to_signUpFragment
+                                    is ImageAttachmentFragment -> R.id.action_imageAttachmentFragment_to_signUpFragment
+                                    is SignInFragment -> R.id.action_signInFragment_to_signUpFragment
+                                    else -> R.id.action_feedFragment_to_signUpFragment
+                                }
+                            )
+                            true
+                        }
+
+                        R.id.logout -> {
+
+                            if (supportFragmentManager.fragments.last()
+                                    ?.getChildFragmentManager()?.fragments?.get(0) is NewPostFragment
+                            ) {
+                                AlertDialog.Builder(this@AppActivity)
+                                    .setMessage(getString(R.string.sure_post_dialog))
+                                    .setTitle(getString(R.string.sure_post_dialog_header))
+                                    .setPositiveButton(getString(R.string.logout)) { dialog, which ->
+                                        AppAuth.getInstance().clearAuth()
+                                        findNavController(R.id.nav_host_fragment).navigateUp()
+                                    }
+                                    .setNegativeButton(getString(R.string.cancel)) { dialog, which ->
+                                    }
+                                    .create()
+                                    .show()
+                            } else {
+                                AppAuth.getInstance().clearAuth()
+                            }
+                            true
+                        }
+
+                        else -> false
+                    }
+
+
+            }.also {
+                currentMenuProvider = it
+            })
+
+        }
+
     }
+
 
     private fun requestNotificationsPermission() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
