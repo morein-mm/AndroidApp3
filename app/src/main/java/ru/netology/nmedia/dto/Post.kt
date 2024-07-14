@@ -19,6 +19,8 @@ data class Post(
 
 }
 
+data class PushToken(val token: String)
+
 data class Attachment(
     val url: String,
     val type: AttachmentType
