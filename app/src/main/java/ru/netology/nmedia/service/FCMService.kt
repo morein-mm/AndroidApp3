@@ -38,11 +38,19 @@ class FCMService : FirebaseMessagingService() {
     }
 
     override fun onMessageReceived(message: RemoteMessage) {
-
+        println(message.data["content"])
         message.data[action]?.let {
-           when (Action.valueOf(it)) {
-              Action.LIKE -> handleLike(gson.fromJson(message.data[content], Like::class.java))
-           }
+            when (Action.valueOf(it)) {
+                Action.LIKE -> handleLike(gson.fromJson(message.data[content], Like::class.java))
+            }
+        }
+
+        message.data["content"]?.let {
+            val message = gson.fromJson(message.data[content], Message::class.java)
+            when (message.recepientId) {
+                AppAuth.getInstance().state.value?.id, null -> showNotification(message.content)
+                else -> AppAuth.getInstance().sendPushToken(AppAuth.getInstance().state.value?.token)
+            }
         }
     }
 
@@ -60,6 +68,18 @@ class FCMService : FirebaseMessagingService() {
                     content.userName,
                     content.postAuthor,
                 )
+            )
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .build()
+
+        notify(notification)
+    }
+
+    private fun showNotification(content: String) {
+        val notification = NotificationCompat.Builder(this, channelId)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setContentTitle(
+                content
             )
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .build()
@@ -89,5 +109,10 @@ data class Like(
     val userName: String,
     val postId: Long,
     val postAuthor: String,
+)
+
+data class Message(
+    val recepientId: Long?,
+    val content: String,
 )
 
