@@ -11,9 +11,11 @@ import ru.netology.nmedia.dto.Token
 import ru.netology.nmedia.model.FeedModelState
 import ru.netology.nmedia.repository.AuthRepository
 
-class AuthViewModel : ViewModel() {
+class AuthViewModel(
+    private val appAuth: AppAuth,
+) : ViewModel() {
     private val repository = AuthRepository()
-    val auth: LiveData<Token?> = AppAuth.getInstance().state
+    val auth: LiveData<Token?> = appAuth.state
         .asLiveData()
 
     val isAuthorized: Boolean
@@ -24,13 +26,8 @@ class AuthViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val token = repository.login(login, password)
-                AppAuth.getInstance().setAuth(token.id, token.token)
+                appAuth.setAuth(token.id, token.token)
             } catch (e: Exception) {
-                println("11")
-//                _dataState.value = FeedModelState(error = true)
-                //как обработать ошибку?
-
-
             }
         }
     }
@@ -39,13 +36,8 @@ class AuthViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val token = repository.registerUser(login, password, name)
-                AppAuth.getInstance().setAuth(token.id, token.token)
+                appAuth.setAuth(token.id, token.token)
             } catch (e: Exception) {
-                println("11")
-//                _dataState.value = FeedModelState(error = true)
-                //как обработать ошибку?
-
-
             }
         }
     }

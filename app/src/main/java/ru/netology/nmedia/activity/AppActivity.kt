@@ -2,9 +2,6 @@ package ru.netology.nmedia.activity
 
 import android.Manifest
 import android.app.AlertDialog
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
@@ -15,19 +12,19 @@ import android.view.MenuItem
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.core.view.MenuProvider
 import androidx.navigation.findNavController
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.firebase.messaging.FirebaseMessaging
+import ru.netology.nmedia.DependencyContainer
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
-import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.viewmodel.AuthViewModel
+import ru.netology.nmedia.viewmodel.ViewModelFactory
 
 class AppActivity : AppCompatActivity(R.layout.activity_app) {
-
+    private val dependencyContainer = DependencyContainer.getInstance()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -55,7 +52,15 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
 
         checkGoogleApiAvailability()
 
-        val viewModel by viewModels<AuthViewModel>()
+        val viewModel: AuthViewModel by viewModels(
+            factoryProducer = {
+                ViewModelFactory(
+                    dependencyContainer.repository,
+                    dependencyContainer.appAuth
+                )
+            }
+        )
+
         var currentMenuProvider: MenuProvider? = null
         viewModel.auth.observe(this) {
             val isAuthorized = viewModel.isAuthorized
@@ -100,7 +105,7 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
                                     .setMessage(getString(R.string.sure_post_dialog))
                                     .setTitle(getString(R.string.sure_post_dialog_header))
                                     .setPositiveButton(getString(R.string.logout)) { dialog, which ->
-                                        AppAuth.getInstance().clearAuth()
+                                        dependencyContainer.appAuth.clearAuth()
                                         findNavController(R.id.nav_host_fragment).navigateUp()
                                     }
                                     .setNegativeButton(getString(R.string.cancel)) { dialog, which ->
@@ -108,7 +113,7 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
                                     .create()
                                     .show()
                             } else {
-                                AppAuth.getInstance().clearAuth()
+                                dependencyContainer.appAuth.clearAuth()
                             }
                             true
                         }

@@ -12,6 +12,7 @@ import androidx.core.app.NotificationManagerCompat
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.google.gson.Gson
+import ru.netology.nmedia.DependencyContainer
 import ru.netology.nmedia.R
 import ru.netology.nmedia.auth.AppAuth
 import kotlin.random.Random
@@ -49,14 +50,14 @@ class FCMService : FirebaseMessagingService() {
             val message = gson.fromJson(message.data[content], Message::class.java)
             when (message.recepientId) {
                 AppAuth.getInstance().state.value?.id, null -> showNotification(message.content)
-                else -> AppAuth.getInstance().sendPushToken(AppAuth.getInstance().state.value?.token)
+                else -> DependencyContainer.getInstance().appAuth.sendPushToken(DependencyContainer.getInstance().appAuth.state.value?.token)
             }
         }
     }
 
     override fun onNewToken(token: String) {
         println(token)
-        AppAuth.getInstance().sendPushToken(token)
+        DependencyContainer.getInstance().appAuth.sendPushToken(token)
     }
 
     private fun handleLike(content: Like) {

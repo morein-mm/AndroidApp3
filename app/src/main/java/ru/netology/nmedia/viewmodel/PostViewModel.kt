@@ -1,27 +1,22 @@
 package ru.netology.nmedia.viewmodel
 
-import android.app.Application
 import android.net.Uri
-import android.provider.ContactsContract.Contacts.Photo
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import ru.netology.nmedia.auth.AppAuth
-import ru.netology.nmedia.db.AppDb
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.model.FeedModel
 import ru.netology.nmedia.model.FeedModelState
 import ru.netology.nmedia.model.PhotoModel
 import ru.netology.nmedia.repository.PostRepository
-import ru.netology.nmedia.repository.PostRepositoryImpl
 import ru.netology.nmedia.util.SingleLiveEvent
 import java.io.File
 
@@ -40,21 +35,22 @@ private val empty = Post(
 
 private val noPhoto = PhotoModel()
 
-class PostViewModel(application: Application) : AndroidViewModel(application) {
-    // упрощённый вариант
-    private val repository: PostRepository =
-        PostRepositoryImpl(AppDb.getInstance(context = application).postDao())
+class PostViewModel(
+    private val repository: PostRepository,
+    private val appAuth: AppAuth,
+) : ViewModel() {
 
-    val data: LiveData<FeedModel> = AppAuth.getInstance().state.flatMapLatest { auth ->
-        repository.data
-            .map{posts ->
-                FeedModel(posts.map {
-                    it.copy(
-                        ownedByMe = it.authorId == auth?.id
-                    )
-                })
-            }
-    }
+    val data: LiveData<FeedModel> = appAuth
+        .state.flatMapLatest { auth ->
+            repository.data
+                .map { posts ->
+                    FeedModel(posts.map {
+                        it.copy(
+                            ownedByMe = it.authorId == auth?.id
+                        )
+                    })
+                }
+        }
         .asLiveData(Dispatchers.Default)
     private val _dataState = MutableLiveData<FeedModelState>()
     val dataState: LiveData<FeedModelState>
@@ -106,7 +102,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                 try {
                     when (_photo.value) {
                         noPhoto -> repository.save(it)
-                        else -> _photo.value?.file?.let {file ->
+                        else -> _photo.value?.file?.let { file ->
                             repository.saveWithAttachment(it, file)
                         }
                     }
@@ -134,7 +130,8 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 
     fun likeById(id: Long) {
 
-        val likedByMe = repository.data.asLiveData().value?.find { it.id == id }?.likedByMe ?: return
+        val likedByMe =
+            repository.data.asLiveData().value?.find { it.id == id }?.likedByMe ?: return
         viewModelScope.launch {
             try {
                 repository.likeById(id, likedByMe)

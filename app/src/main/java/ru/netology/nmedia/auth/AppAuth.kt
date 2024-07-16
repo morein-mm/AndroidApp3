@@ -11,11 +11,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import ru.netology.nmedia.api.Api
+import ru.netology.nmedia.DependencyContainer
+import ru.netology.nmedia.api.apiService
 import ru.netology.nmedia.dto.PushToken
 import ru.netology.nmedia.dto.Token
 
-class AppAuth private constructor(context: Context) {
+class AppAuth (context: Context) {
 
     private val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
     private val _state = MutableStateFlow<Token?>(null)
@@ -55,7 +56,7 @@ class AppAuth private constructor(context: Context) {
         CoroutineScope(Dispatchers.Default).launch {
             val push = PushToken(token ?: Firebase.messaging.token.await())
             try {
-                Api.service.saveToken(push)
+                DependencyContainer.getInstance().apiService.saveToken(push)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
