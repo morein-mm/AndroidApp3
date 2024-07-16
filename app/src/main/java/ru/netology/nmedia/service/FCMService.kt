@@ -47,7 +47,7 @@ class FCMService : FirebaseMessagingService() {
 
         message.data["content"]?.let {
             val message = gson.fromJson(message.data[content], Message::class.java)
-            when (message.recepientId) {
+            when (message.recipientId) {
                 AppAuth.getInstance().state.value?.id, null -> showNotification(message.content)
                 else -> AppAuth.getInstance().sendPushToken(AppAuth.getInstance().state.value?.token)
             }
@@ -112,7 +112,7 @@ data class Like(
 )
 
 data class Message(
-    val recepientId: Long?,
+    val recipientId: Long?,
     val content: String,
 )
 
