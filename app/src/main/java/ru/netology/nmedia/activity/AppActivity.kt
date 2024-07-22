@@ -17,14 +17,19 @@ import androidx.navigation.findNavController
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.firebase.messaging.FirebaseMessaging
-import ru.netology.nmedia.DependencyContainer
+import dagger.hilt.android.AndroidEntryPoint
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
+import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.viewmodel.AuthViewModel
-import ru.netology.nmedia.viewmodel.ViewModelFactory
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class AppActivity : AppCompatActivity(R.layout.activity_app) {
-    private val dependencyContainer = DependencyContainer.getInstance()
+
+    @Inject
+    lateinit var appAuth: AppAuth
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -52,14 +57,7 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
 
         checkGoogleApiAvailability()
 
-        val viewModel: AuthViewModel by viewModels(
-            factoryProducer = {
-                ViewModelFactory(
-                    dependencyContainer.repository,
-                    dependencyContainer.appAuth
-                )
-            }
-        )
+        val viewModel: AuthViewModel by viewModels()
 
         var currentMenuProvider: MenuProvider? = null
         viewModel.auth.observe(this) {
@@ -105,7 +103,7 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
                                     .setMessage(getString(R.string.sure_post_dialog))
                                     .setTitle(getString(R.string.sure_post_dialog_header))
                                     .setPositiveButton(getString(R.string.logout)) { dialog, which ->
-                                        dependencyContainer.appAuth.clearAuth()
+                                        appAuth.clearAuth()
                                         findNavController(R.id.nav_host_fragment).navigateUp()
                                     }
                                     .setNegativeButton(getString(R.string.cancel)) { dialog, which ->
@@ -113,7 +111,7 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
                                     .create()
                                     .show()
                             } else {
-                                dependencyContainer.appAuth.clearAuth()
+                                appAuth.clearAuth()
                             }
                             true
                         }

@@ -24,9 +24,13 @@ import ru.netology.nmedia.error.ApiError
 import ru.netology.nmedia.error.NetworkError
 import ru.netology.nmedia.error.UnknownError
 import java.io.File
+import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
 
-class PostRepositoryImpl(private val dao: PostDao, private val apiService: ApiService) : PostRepository {
+class PostRepositoryImpl @Inject constructor(
+    private val dao: PostDao,
+    private val apiService: ApiService
+) : PostRepository {
     override val data = dao.getAllShown()
         .map(List<PostEntity>::toDto)
         .flowOn(Dispatchers.Default)
