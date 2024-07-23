@@ -8,6 +8,7 @@ import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -61,7 +62,7 @@ class AppAuth @Inject constructor(
         sendPushToken()
     }
 
-    @InstallIn(Singleton::class)
+    @InstallIn(SingletonComponent::class)
     @EntryPoint
     interface AppAuthEntryPoint {
         fun getApiService(): ApiService

@@ -94,7 +94,8 @@ dependencies {
     kapt "androidx.room:room-compiler:$room_version"
 //    kapt "com.google.gadder:hilt-compiler:$hilt_version"
     implementation "com.google.dagger:hilt-android:$hilt_version"
-    implementation "com.google.dagger:hilt-compiler:$hilt_version"
+//    implementation "com.google.dagger:hilt-compiler:$hilt_version"
+    kapt "com.google.dagger:hilt-android-compiler:$hilt_version"
     implementation "androidx.room:room-ktx:$room_version"
     implementation platform("com.google.firebase:firebase-bom:$firebase_version")
     implementation "com.google.firebase:firebase-messaging-ktx"
