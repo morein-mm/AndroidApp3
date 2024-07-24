@@ -2,6 +2,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'com.google.gms.google-services'
+apply plugin: 'dagger.hilt.android.plugin'
 
 android {
     namespace "ru.netology.nmedia"
@@ -47,6 +48,7 @@ android {
 }
 
 dependencies {
+    implementation 'com.google.android.gms:play-services-cast-framework:21.5.0'
     def core_version = "1.13.1"
     def appcompat_version = "1.6.1"
     def constraintlayout_version = "2.1.4"
@@ -68,8 +70,12 @@ dependencies {
     def okhttplogging_version = "4.12.0"
     def coroutines_version = "1.8.0"
     def play_services_base_version = "18.4.0"
+    def imagepicker_version = "2.1"
+
+
 
     implementation fileTree(dir: "libs", include: ["*.jar"])
+    implementation "com.github.dhaval2404:imagepicker:$imagepicker_version"
     implementation "androidx.core:core-ktx:$core_version"
     implementation "androidx.appcompat:appcompat:$appcompat_version"
     implementation "androidx.constraintlayout:constraintlayout:$constraintlayout_version"
@@ -86,6 +92,10 @@ dependencies {
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
     implementation "androidx.room:room-runtime:$room_version"
     kapt "androidx.room:room-compiler:$room_version"
+//    kapt "com.google.gadder:hilt-compiler:$hilt_version"
+    implementation "com.google.dagger:hilt-android:$hilt_version"
+//    implementation "com.google.dagger:hilt-compiler:$hilt_version"
+    kapt "com.google.dagger:hilt-android-compiler:$hilt_version"
     implementation "androidx.room:room-ktx:$room_version"
     implementation platform("com.google.firebase:firebase-bom:$firebase_version")
     implementation "com.google.firebase:firebase-messaging-ktx"
