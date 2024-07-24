@@ -39,7 +39,7 @@ class ApiModule {
         .addInterceptor { chain ->
             chain.proceed(
                 chain.run {
-                    val token = AppAuth.getInstance().state.value?.token
+                    val token = appAuth.state.value?.token
                     if (token != null) {
                         this.request().newBuilder()
                             .addHeader("Authorization", token)

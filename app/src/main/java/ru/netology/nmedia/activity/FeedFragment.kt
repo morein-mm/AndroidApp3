@@ -27,8 +27,12 @@ import ru.netology.nmedia.viewmodel.PostViewModel
 class FeedFragment : Fragment() {
 
     private val viewModel: PostViewModel by viewModels(
-        ownerProducer = ::requireParentFragment
+//        ownerProducer = ::requireParentFragment
     )
+
+//    private val viewModel: PostViewModel by viewModels(
+//        ownerProducer = ::requireParentFragment
+//    )
 
     override fun onCreateView(
         inflater: LayoutInflater,
