@@ -29,6 +29,11 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
 
     @Inject
     lateinit var appAuth: AppAuth
+    @Inject
+    lateinit var googleApiAvailability: GoogleApiAvailability
+    @Inject
+    lateinit var firebaseMessaging: FirebaseMessaging
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,7 +60,7 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
                 )
         }
 
-        checkGoogleApiAvailability()
+        checkGoogleApiAvailability(googleApiAvailability, firebaseMessaging)
 
         val viewModel: AuthViewModel by viewModels()
 
@@ -143,8 +148,12 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
         requestPermissions(arrayOf(permission), 1)
     }
 
-    private fun checkGoogleApiAvailability() {
-        with(GoogleApiAvailability.getInstance()) {
+    private fun checkGoogleApiAvailability (
+        googleApiAvailability: GoogleApiAvailability,
+        firebaseMessaging: FirebaseMessaging
+    ) {
+
+        with(googleApiAvailability) {
             val code = isGooglePlayServicesAvailable(this@AppActivity)
             if (code == ConnectionResult.SUCCESS) {
                 return@with
@@ -157,7 +166,7 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
                 .show()
         }
 
-        FirebaseMessaging.getInstance().token.addOnSuccessListener {
+        firebaseMessaging.token.addOnSuccessListener {
             println(it)
         }
     }

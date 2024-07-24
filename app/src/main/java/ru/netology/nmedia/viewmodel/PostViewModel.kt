@@ -40,7 +40,7 @@ private val noPhoto = PhotoModel()
 @HiltViewModel
 class PostViewModel @Inject constructor(
     private val repository: PostRepository,
-    private val appAuth: AppAuth,
+    appAuth: AppAuth,
 ) : ViewModel() {
 
     val data: LiveData<FeedModel> = appAuth
