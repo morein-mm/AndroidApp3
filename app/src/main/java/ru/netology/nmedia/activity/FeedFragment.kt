@@ -119,16 +119,16 @@ class FeedFragment : Fragment() {
 //            binding.emptyText.isVisible = state.empty
 //        }
 
-        viewModel.newerCount.observe(viewLifecycleOwner) {
-            Log.d("FeedFragment", "Newer count: $it")
-            if (it > 0) {
-                binding.showNewerPosts.text = getString(R.string.showNewPosts, it)
-                binding.showNewerPosts.visibility = View.VISIBLE
-            } else {
-                binding.showNewerPosts.visibility = View.GONE
-            }
-
-        }
+//        viewModel.newerCount.observe(viewLifecycleOwner) {
+//            Log.d("FeedFragment", "Newer count: $it")
+//            if (it > 0) {
+//                binding.showNewerPosts.text = getString(R.string.showNewPosts, it)
+//                binding.showNewerPosts.visibility = View.VISIBLE
+//            } else {
+//                binding.showNewerPosts.visibility = View.GONE
+//            }
+//
+//        }
 
         binding.showNewerPosts.setOnClickListener {
             viewModel.showAll()
