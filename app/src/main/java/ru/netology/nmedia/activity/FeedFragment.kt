@@ -10,10 +10,13 @@ import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.paging.LoadState
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.ImageAttachmentFragment.Companion.textArg
 import ru.netology.nmedia.adapter.OnInteractionListener
@@ -105,10 +108,16 @@ class FeedFragment : Fragment() {
                     .show()
             }
         }
-        viewModel.data.observe(viewLifecycleOwner) { state ->
-            adapter.submitList(state.posts)
-            binding.emptyText.isVisible = state.empty
+
+        lifecycleScope.launchWhenCreated {
+            viewModel.data.collectLatest {
+                adapter.submitData(it)
+            }
         }
+//        viewModel.data.observe(viewLifecycleOwner) { state ->
+//            adapter.submitList(state.posts)
+//            binding.emptyText.isVisible = state.empty
+//        }
 
         viewModel.newerCount.observe(viewLifecycleOwner) {
             Log.d("FeedFragment", "Newer count: $it")
@@ -134,8 +143,20 @@ class FeedFragment : Fragment() {
             }
         })
 
+        lifecycleScope.launchWhenCreated {
+
+            adapter.loadStateFlow.collectLatest {
+                binding.swiperefresh.isRefreshing = it.refresh is LoadState.Loading
+                        || it.append is LoadState.Loading
+                        || it.prepend is LoadState.Loading
+            }
+
+        }
+
+
         binding.swiperefresh.setOnRefreshListener {
-            viewModel.refreshPosts()
+//            viewModel.refreshPosts()
+            adapter.refresh()
         }
 
         binding.fab.setOnClickListener {

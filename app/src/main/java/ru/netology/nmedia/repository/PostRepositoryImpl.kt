@@ -1,6 +1,8 @@
 package ru.netology.nmedia.repository
 
 import androidx.lifecycle.*
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -31,9 +33,18 @@ class PostRepositoryImpl @Inject constructor(
     private val dao: PostDao,
     private val apiService: ApiService
 ) : PostRepository {
-    override val data = dao.getAllShown()
-        .map(List<PostEntity>::toDto)
-        .flowOn(Dispatchers.Default)
+    override val data = Pager(
+        config = PagingConfig(pageSize = 10, enablePlaceholders = false),
+        pagingSourceFactory = {
+            PostPagingSource(
+                apiService
+            )
+        }
+    ).flow
+
+//        dao.getAllShown()
+//        .map(List<PostEntity>::toDto)
+//        .flowOn(Dispatchers.Default)
     override var startLocalId = -1L
 
     override suspend fun getAll() {
