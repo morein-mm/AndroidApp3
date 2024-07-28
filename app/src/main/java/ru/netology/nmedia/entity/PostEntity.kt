@@ -22,12 +22,13 @@ data class PostEntity(
     val shown: Boolean= true,
     @Embedded
     var attachment: AttachmentEmbeddable?,
+    var ownedByMe: Boolean = false
 ) {
     fun toDto() = Post(id, author, authorId, authorAvatar, content, published, likedByMe, likes, draft, shown, attachment?.toDto())
 
     companion object {
-        fun fromDto(dto: Post, shown: Boolean = true ) =
-            PostEntity(dto.id, dto.author, dto.authorId, dto.authorAvatar, dto.content, dto.published, dto.likedByMe, dto.likes, dto.draft, shown, AttachmentEmbeddable.fromDto(dto.attachment))
+        fun fromDto(dto: Post, shown: Boolean = true) =
+            PostEntity(dto.id, dto.author, dto.authorId, dto.authorAvatar, dto.content, dto.published, dto.likedByMe, dto.likes, dto.draft, shown, AttachmentEmbeddable.fromDto(dto.attachment), ownedByMe = false)
 
     }
 }
