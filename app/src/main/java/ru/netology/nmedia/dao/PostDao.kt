@@ -40,4 +40,7 @@ interface PostDao {
 
     @Query("SELECT MIN(id) FROM PostEntity")
     suspend fun getMinId(): Long
+
+    @Query("DELETE FROM PostEntity")
+    suspend fun clear()
 }
