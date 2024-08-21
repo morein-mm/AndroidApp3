@@ -21,4 +21,25 @@
     <string name="notification_user_liked">%1$s поставил лайк посту %2$s</string>
     <string name="channel_remote_name">Уведомления с сервера</string>
     <string name="channel_remote_description">Уведомления с удалённого сервера</string>
+    <string name="menu_retryLoad">Повторить загрузку</string>
+    <string name="showNewPosts">Показать новые посты - %1$d</string>
+    <string name="menu_save">Сохранить</string>
+    <string name="description_select_photo">Выбрать фото</string>
+    <string name="description_take_photo">Сделать фото</string>
+    <string name="description_photo">Фото</string>
+    <string name="remove">Удалить</string>
+    <string name="logout">Выйти</string>
+    <string name="sign_in">Войти</string>
+    <string name="sign_up">Зарегистрироваться</string>
+    <string name="login">Логин</string>
+    <string name="password">Пароль</string>
+    <string name="create_post_dialog">Делитесь текстами и фотографиями.</string>
+    <string name="create_post_dialog_header">Войдите и создавайте посты!</string>
+    <string name="cancel">Отмена</string>
+    <string name="like_post_dialog">Покажите ваши эмоции.</string>
+    <string name="like_post_dialog_header">Войдите и отправляйте реакции!</string>
+    <string name="sure_post_dialog">Если выйти, пост не будет создан.</string>
+    <string name="sure_post_dialog_header">Вы уверены?</string>
+    <string name="name">Имя</string>
+    <string name="password_confirm">Подтверждение пароля</string>
 </resources>
