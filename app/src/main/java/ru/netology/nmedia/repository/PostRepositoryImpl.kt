@@ -132,19 +132,19 @@ class PostRepositoryImpl @Inject constructor(
     }
 
     override fun getNewerCount(newerId: Long): Flow<Int> = flow {
-        while (true) {
-            delay(10.seconds)
-            try {
-                val responce = apiService.getNewer(newerId)
-                val body = responce.body() ?: continue
-                dao.insert(body.toEntity(false))
-                emit(dao.countNotShown())
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                // do nothing
-            }
-        }
+//        while (true) {
+//            delay(10.seconds)
+//            try {
+////                val responce = apiService.getNewer(newerId)
+////                val body = responce.body() ?: continue
+////                dao.insert(body.toEntity(false))
+////                emit(dao.countNotShown())
+//            } catch (e: CancellationException) {
+//                throw e
+//            } catch (e: Exception) {
+//                // do nothing
+//            }
+//        }
     }
 
     override suspend fun saveWithAttachment(post: Post, file: File) {
